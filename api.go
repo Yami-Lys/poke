@@ -74,6 +74,19 @@ func commandCatch(cfg *config, args []string) error {
 	return nil
 }
 
+func commandPokedex(cfg *config, args []string) error {
+	if len(cfg.Pokedex) == 0 {
+		fmt.Println("Your Pokedex is empty. Try catching some Pokemon first!")
+		return nil
+	}
+
+	fmt.Println("Pokemon in your Pokedex:")
+	for name := range cfg.Pokedex {
+		fmt.Printf(" - %s\n", name)
+	}
+	return nil
+}
+
 func fetchURL(url string, cfg *config) ([]byte, error) {
 	if val, ok := cfg.Cache.Get(url); ok {
 		return val, nil
