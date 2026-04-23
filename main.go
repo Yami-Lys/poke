@@ -4,20 +4,43 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"time"
+
+	"github.com/Yami-Lys/poke/internal/pokecache"
 )
 
+type config struct {
+	Next     *string
+	Previous *string
+	Cache    *pokecache.Cache
+}
+
 func main() {
+	cfg := &config{
+		Cache: pokecache.NewCache(5 * 60 * time.Second),
+	}
+
 	var cliCommands map[string]cliCommand
 	cliCommands = map[string]cliCommand{
 		"help": {
 			name:        "help",
 			description: "Display a help message",
-			callback:    func() error { return commandHelp(cliCommands) },
+			callback:    func() error { return commandHelp(cfg, cliCommands) },
 		},
 		"exit": {
 			name:        "exit",
 			description: "Exit the Pokedex",
-			callback:    commandExit,
+			callback:    func() error { return commandExit(cfg) },
+		},
+		"map": {
+			name:        "map",
+			description: "Display the next 20 location areas",
+			callback:    func() error { return commandMap(cfg) },
+		},
+		"mapb": {
+			name:        "mapb",
+			description: "Display the previous 20 location areas",
+			callback:    func() error { return commandMapb(cfg) },
 		},
 	}
 
@@ -43,13 +66,13 @@ func main() {
 	}
 }
 
-func commandExit() error {
+func commandExit(cfg *config) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil
 }
 
-func commandHelp(commands map[string]cliCommand) error {
+func commandHelp(cfg *config, commands map[string]cliCommand) error {
 	fmt.Println("Welcome to the Pokedex!\nUsage:\n")
 	for _, cmd := range commands {
 		fmt.Printf("- %s: %s\n", cmd.name, cmd.description)
